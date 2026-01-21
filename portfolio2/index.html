@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teaching & Learning Lab | Creative Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Added FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto+Mono:wght@400;500&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define color variables for light and dark themes */
+        :root {
+            --glass-opacity: 0.8;
+            --bg-color: #ffffff;
+            --bg-color-rgb: 255, 255, 255;
+            --text-color: #1a1a1a;
+            --primary-color: #df3030; /* Red */
+            --secondary-color: #3556ff; /* Blue */
+            --tertiary-color: #ffff00; /* Yellow */
+            --accent-color: #333333;
+            --card-bg: #f7f7f7;
+            --card-border: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark {
+            --bg-color: #1a1a1a;
+            --bg-color-rgb: 26, 26, 26;
+            --text-color: #ffffff;
+            --primary-color: #ff3333; /* Brighter Red */
+            --secondary-color: #3366ff; /* Brighter Blue */
+            --tertiary-color: #ffff66; /* Brighter Yellow */
+            --accent-color: #cccccc;
+            --card-bg: #2a2a2a;
+            --card-border: #444444;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-panel {
+            background-color: rgba(var(--bg-color-rgb), var(--glass-opacity));
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+        }
+        
+        /* General styling */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Art Deco Triangle Motif */
+        .deco-triangle {
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        /* Custom styling for components */
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .filter-btn.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .project-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+
+        .project-card .info-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .project-card:hover .info-overlay {
+            opacity: 1;
+        }
+
+        .project-card iframe {
+            pointer-events: none; /* Allows clicks to pass through to the card */
+        }
+
+        .aspect-16-9 {
+            position: relative;
+            padding-top: 56.25%; /* 9 / 16 = 0.5625 */
+        }
+        .aspect-16-9 > * {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Modal styling */
+        #modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+        }
+        #modal-container.open #modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* Theme switcher styling */
+        .theme-switcher {
+            width: 50px;
+            height: 26px;
+            background-color: var(--accent-color);
+            border-radius: 13px;
+            padding: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .theme-switcher-dot {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        html.dark .theme-switcher-dot {
+            transform: translateX(24px);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* Styles for project content overlay */
+        .project-content a {
+            position: relative;
+            display: block;
+        }
+        .project-content .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            font-family: 'Inter', sans-serif;
+            z-index: 10;
+        }
+        .project-content a:hover .overlay {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+    <iframe src="background.html" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; border: none; pointer-events: none;"></iframe>
+
+    <!-- Header -->
+    <header id="header" class="sticky top-0 z-40 bg-[var(--bg-color)]/80 backdrop-blur-md border-b border-[var(--card-border)]">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold tracking-wider" style="color: var(--text-color);">
+                TEACHING & LEARNING LAB
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#work" class="text-lg hover:text-[var(--primary-color)] transition-colors">Work</a>
+                <a href="#about" class="text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
+                <div id="theme-switcher" class="theme-switcher">
+                    <div class="theme-switcher-dot"></div>
+                </div>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#work" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">Work</a>
+            <a href="#about" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
+            <div class="flex items-center mt-2 space-x-4">
+                 <span>Theme:</span>
+                 <div id="theme-switcher-mobile" class="theme-switcher">
+                    <div class="theme-switcher-dot"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <!-- Feature Section -->
+        <section id="feature" class="glass-panel mb-24 p-8 rounded-lg">
+            <h2 class="text-4xl font-bold mb-8 text-center md:text-left">Main Feature</h2>
+            <div class="flex flex-col md:flex-row items-stretch gap-8 md:gap-12">
+                <div class="w-full md:w-1/2">
+                    <div class="h-80 md:h-full rounded-lg overflow-hidden">
+                        <iframe src="carousel.html" class="w-full h-full" frameborder="0" scrolling="no"></iframe>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 text-center md:text-left flex flex-col justify-center">
+                    <span class="font-mono text-sm" style="color: var(--accent-color);">Featured Topic</span>
+                    <h3 class="text-3xl font-bold mt-2" style="color: var(--primary-color);">Beyond the Slideshow: Multimedia in Modern Education</h3>
+                    <p class="mt-4 text-lg">
+                        The definition of "multimedia" has evolved far beyond a simple mix of text and images. Today, it refers to the rich, interactive digital experiences that are essential for modern teaching. At TLL, we see multimedia as a powerful tool to transform learning through:
+                    </p>
+                    <ul class="mt-4 list-disc list-inside text-lg space-y-2 text-left">
+                        <li><strong>Interactive Content:</strong> Engaging students with custom-built educational games, simulations, and web applications.</li>
+                        <li><strong>Immersive Media:</strong> Using Virtual and Augmented Reality (VR/AR) and 3D models to let students explore and interact with their subjects in new ways.</li>
+                        <li><strong>Dynamic Visuals & Audio:</strong> Clarifying complex information with data visualizations, animations, podcasts, and AI-enhanced graphics.</li>
+                    </ul>
+                    <p class="mt-4 text-lg">
+                        By using modern multimedia, you can move beyond traditional lectures to create a more inclusive and effective classroom. It helps make abstract concepts tangible, promotes active participation over passive observation, and provides students with flexible, on-demand resources that reinforce learning anytime, anywhere.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Work Section -->
+        <section id="work" class="glass-panel mb-24 p-8 rounded-lg">
+            <h2 class="text-4xl font-bold mb-8 text-center">All Projects</h2>
+            <!-- Filters -->
+            <div id="filters" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12">
+                <button class="filter-btn active px-4 py-2" data-filter="all">All</button>
+            </div>
+            <!-- Project Grid -->
+            <div id="project-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Projects will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="glass-panel py-16 rounded-lg text-center mb-24">
+             <h2 class="text-4xl font-bold mb-4">About Us</h2>
+             <p class="max-w-3xl mx-auto text-lg mb-8">
+                For 25 years, the Teaching and Learning Lab (TLL) has been the university's hub for educational innovation. We are multimedia experts who create engaging games, web apps, graphics, animations and presentations to enhance the learning experience.
+             </p>
+             <p class="max-w-3xl mx-auto text-lg mb-8">
+                Our team stays on the cutting edge, integrating AI, 3D scanning, AR, and VR into our projects. Led by Director Paul St. Denis, with his 40 years of coding experience, we combine deep expertise with modern technology. We invite instructors and TAs to collaborate with us to bring your innovative teaching ideas to life.
+             </p>
+             <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+                <a href="mailto:tltmedia@stonybrook.edu" class="px-8 py-3 rounded-full text-white font-bold transition-transform duration-300 hover:scale-105" style="background-color: var(--primary-color);">
+                    Contact Us
+                </a>
+                <span class="text-lg font-bold" style="color: var(--text-color);">(631) 632-1033</span>
+                <a href="assets/Liam-Yehudai-CV.pdf" target="_blank" rel="noopener noreferrer" class="px-8 py-3 rounded-full font-bold border-2 transition-transform duration-300 hover:scale-105" style="border-color: var(--secondary-color); color: var(--secondary-color);">
+                    Download CV
+                </a>
+             </div>
+        </section>
+
+    </main>
+    
+    <footer class="glass-panel text-center py-6 mt-12 rounded-t-lg p-4">
+        <p style="color: var(--accent-color);">&copy; 2025 Teaching & Learning Lab. All Rights Reserved.</p>
+    </footer>
+
+
+    <!-- Modal -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-backdrop" class="fixed inset-0 bg-black/70"></div>
+        <div id="modal-content" class="relative bg-[var(--bg-color)] rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-[var(--card-border)] flex justify-between items-center">
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
+                    <p class="font-mono text-sm" style="color: var(--accent-color);">
+                        <span id="modal-date"></span> &mdash; <span id="modal-medium"></span>
+                    </p>
+                </div>
+                <button id="modal-close-btn" class="text-2xl hover:text-[var(--primary-color)]">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div id="modal-body-content" class="mb-6">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+                <div id="modal-blurb" class="text-base leading-relaxed"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- DATA ---
+            let projects = [];
+            let descriptions = {};
+
+            try {
+                const projectsResponse = await fetch('ProjectData.json');
+                projects = await projectsResponse.json();
+                const descriptionsResponse = await fetch('Descriptions.json');
+                descriptions = await descriptionsResponse.json();
+            } catch (error) {
+                console.error('Error fetching project data:', error);
+            }
+
+            // --- ELEMENTS ---
+            const projectGrid = document.getElementById('project-grid');
+            const filtersContainer = document.getElementById('filters');
+            const modalContainer = document.getElementById('modal-container');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDate = document.getElementById('modal-date');
+            const modalMedium = document.getElementById('modal-medium');
+            const modalBlurb = document.getElementById('modal-blurb');
+            const modalBodyContent = document.getElementById('modal-body-content');
+
+            // --- FUNCTIONS ---
+            function renderProjects(filter = 'all') {
+                projectGrid.innerHTML = '';
+                const filteredProjects = filter === 'all' 
+                    ? projects 
+                    : projects.filter(p => p.tags.includes(filter));
+
+                filteredProjects.forEach(project => {
+                    const card = document.createElement('div');
+                    card.className = 'project-card rounded-lg overflow-hidden cursor-pointer';
+                    card.dataset.title = project.title;
+                    const thumb = project.thumbnail || 'https://via.placeholder.com/300';
+                    card.innerHTML = `
+                        <div class="aspect-16-9">
+                            <img src="${thumb}" alt="${project.title}" class="w-full h-full object-cover">
+                            <div class="info-overlay absolute inset-0 bg-black/70 p-4 flex flex-col justify-end text-white">
+                                <h3 class="text-xl font-bold">${project.title}</h3>
+                            </div>
+                        </div>
+                    `;
+                    projectGrid.appendChild(card);
+                });
+
+                // Add event listeners to newly created cards
+                document.querySelectorAll('.project-card').forEach(card => {
+                    card.addEventListener('click', () => openModal(card.dataset.title));
+                });
+            }
+
+            function createFilterButtons() {
+                const allTags = new Set();
+                projects.forEach(p => p.tags.forEach(t => allTags.add(t)));
+
+                allTags.forEach(tag => {
+                    const button = document.createElement('button');
+                    button.className = 'filter-btn px-4 py-2';
+                    button.dataset.filter = tag;
+                    button.textContent = tag;
+                    filtersContainer.appendChild(button);
+                });
+
+                const filterButtons = document.querySelectorAll('.filter-btn');
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        renderProjects(button.dataset.filter);
+                    });
+                });
+            }
+
+            function openModal(projectTitle) {
+                const project = projects.find(p => p.title === projectTitle);
+                if (!project) return;
+
+                modalTitle.textContent = project.title;
+                
+                // Build metadata string: Year | Tags | Contributors
+                const metaParts = [];
+                if (project.year) metaParts.push(project.year);
+                if (project.tags && project.tags.length) metaParts.push(project.tags.join(', '));
+                
+                let metaHtml = metaParts.join(' &mdash; ');
+                if (project.contributors) {
+                    metaHtml += `<br><span class="text-sm opacity-75">By ${project.contributors}</span>`;
+                }
+
+                modalDate.innerHTML = ''; // Clear old content if any
+                modalMedium.innerHTML = metaHtml; 
+                
+                const isIframe = project.iframe !== false; // Default to true if undefined
+                const thumb = project.thumbnail || 'https://via.placeholder.com/800x450';
+
+                let contentHtml = '';
+                if (isIframe) {
+                    contentHtml = `
+                        <iframe src="${project.link}" class="w-full h-64 md:h-96" frameborder="0"></iframe>
+                        <div class="overlay">Click to Explore</div>
+                    `;
+                } else {
+                    contentHtml = `
+                        <img src="${thumb}" class="w-full h-auto object-cover rounded max-h-96 mx-auto" alt="${project.title}">
+                        <div class="overlay">Click to Explore</div>
+                    `;
+                }
+
+                modalBodyContent.innerHTML = `
+                    <div class="project-content relative group">
+                        <a href="${project.link}" target="_blank" class="block relative">
+                            ${contentHtml}
+                        </a>
+                    </div>
+                `;
+                modalBlurb.innerHTML = descriptions[project.title] || 'No description available.';
+
+                modalContainer.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => modalContainer.classList.add('open'), 10);
+            }
+
+            function closeModal() {
+                modalContainer.classList.remove('open');
+                document.body.style.overflow = '';
+                 // Wait for transition to finish before hiding
+                setTimeout(() => {
+                    modalContainer.classList.add('hidden');
+                    modalBodyContent.innerHTML = ''; // Clear content to stop videos/iframes
+                }, 300);
+            }
+
+            // --- THEME SWITCHER LOGIC ---
+            const themeSwitchers = [document.getElementById('theme-switcher'), document.getElementById('theme-switcher-mobile')];
+            const htmlEl = document.documentElement;
+            const backgroundIframe = document.querySelector('iframe[src="background.html"]');
+
+            const syncBackgroundPalette = (theme) => {
+                const paletteName = theme === 'dark' ? 'Bauhaus-ish' : 'TLL';
+                if (backgroundIframe && backgroundIframe.contentWindow && typeof backgroundIframe.contentWindow.setPaletteByName === 'function') {
+                    backgroundIframe.contentWindow.setPaletteByName(paletteName);
+                }
+            };
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlEl.classList.add('dark');
+                    htmlEl.classList.remove('light');
+                } else {
+                    htmlEl.classList.add('light');
+                    htmlEl.classList.remove('dark');
+                }
+                syncBackgroundPalette(theme);
+            };
+            
+            // Apply theme on initial load
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+
+            // Add listeners for theme switching
+            themeSwitchers.forEach(switcher => {
+                switcher.addEventListener('click', () => {
+                    const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                });
+            });
+
+            // Also sync palette when iframe finishes loading, in case it was slow
+            if (backgroundIframe) {
+                backgroundIframe.addEventListener('load', () => {
+                    const currentTheme = htmlEl.classList.contains('dark') ? 'dark' : 'light';
+                    syncBackgroundPalette(currentTheme);
+                });
+            }
+
+
+            // --- EVENT LISTENERS ---
+
+            // Pass mouse movement to background iframe for ripple effect
+            document.addEventListener('mousemove', (e) => {
+                if (backgroundIframe && backgroundIframe.contentWindow && typeof backgroundIframe.contentWindow.updateMousePosition === 'function') {
+                    backgroundIframe.contentWindow.updateMousePosition(e.clientX, e.clientY);
+                }
+            });
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalBackdrop.addEventListener('click', closeModal);
+            
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+
+            // --- INITIAL RENDER ---
+            createFilterButtons();
+            renderProjects();
+
+            // --- Opacity Control ---
+            const opacitySlider = document.getElementById('opacity-slider');
+            const opacityValueDisplay = document.getElementById('opacity-value');
+            const root = document.documentElement;
+
+            const applyOpacity = (opacityPercent) => {
+                const opacity = opacityPercent / 100;
+                root.style.setProperty('--glass-opacity', opacity);
+                if (opacityValueDisplay) {
+                    opacityValueDisplay.textContent = `${opacityPercent}%`;
+                }
+                localStorage.setItem('glassOpacity', opacityPercent);
+            };
+
+            if (opacitySlider) {
+                opacitySlider.addEventListener('input', (e) => {
+                    applyOpacity(e.target.value);
+                });
+
+                const savedOpacity = localStorage.getItem('glassOpacity') || '91';
+                opacitySlider.value = savedOpacity;
+                applyOpacity(savedOpacity);
+            }
+        });
+    </script>
+
+    <!-- Opacity Control Panel -->
+    <div id="opacity-controls" class="fixed bottom-4 right-4 z-50 bg-[var(--card-bg)] p-4 rounded-lg shadow-lg border border-[var(--card-border)] w-48">
+        <label for="opacity-slider" class="block text-sm font-medium mb-2">Glass Opacity</label>
+        <input type="range" id="opacity-slider" min="0" max="100" value="91" class="w-full">
+        <span id="opacity-value" class="text-xs text-center block mt-1">80%</span>
+    </div>
+</body>
+</html>

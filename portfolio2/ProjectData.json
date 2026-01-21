@@ -1,0 +1,241 @@
+[
+    {
+        "title": "Protoform",
+        "link": "https://sbutltmedia.github.io/protoForm/",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/ProtoForm.gif",
+        "iframe": false
+    },
+    {
+        "title": "IVQ",
+        "link": "https://apps.tlt.stonybrook.edu/vq/",
+        "tags": [
+            "Faculty Tool",
+            "Graded"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/IVQ.gif",
+        "iframe": false
+    },
+    {
+        "title": "Lab Safety",
+        "link": "https://sbutltmedia.github.io/LabSafety/",
+        "tags": [
+            "VR",
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/LabSafety.gif",
+        "iframe": false
+    },
+    {
+        "title": "Thinking Matter Exericises",
+        "link": "https://sbutltmedia.github.io/ThinkingMattersExercises/menu.html",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/ThinkingMatters.gif",
+        "iframe": true
+    },
+    {
+        "title": "Nand Contraption Game",
+        "link": "https://sbutltmedia.github.io/ThinkingMattersExercises/nand.html",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Nand.gif",
+        "iframe": true
+    },
+    {
+        "title": "Word Golf",
+        "link": "https://sbutltmedia.github.io/ThinkingMattersExercises/wordgolf/",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/WordGolf.gif",
+        "iframe": false
+    },
+    {
+        "title": "Isomorphic Tic Tac Toe",
+        "link": "https://sbutltmedia.github.io/ThinkingMattersExercises/Card_Game/",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/TicTacToe.gif",
+        "iframe": false
+    },
+    {
+        "title": "Grammar Golf",
+        "link": "https://sbutltmedia.github.io/GrammarGolf/public/",
+        "tags": [
+            "Game",
+            "Graded"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/GrammarGolf.gif",
+        "iframe": false
+    },
+    {
+        "title": "Natural Logic Deduction",
+        "link": "https://sbutltmedia.github.io/DragLogicII/#set=2&problem=1",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Deduction.gif",
+        "iframe": false
+    },
+    {
+        "title": "Bio Leader Boards",
+        "link": "https://apps.tlt.stonybrook.edu/bio/leaderboard/",
+        "tags": [
+            "Game",
+            "Graded"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/BioLeaderboards.gif",
+        "iframe": false
+    },
+    {
+        "title": "Simple Image Mapping Quiz",
+        "link": "https://apps.tlt.stonybrook.edu/SIMPLE/uploads/moneal/Flower/",
+        "tags": [
+            "Faculty Tool",
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Simple.gif",
+        "iframe": false
+    },
+    {
+        "title": "Heart Basement",
+        "link": "https://sbutltmedia.github.io/HeartBasement/",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/HeartBasement.gif",
+        "iframe": false
+    },
+    {
+        "title": "Gsplat virtual Gallery",
+        "link": "https://sbutltmedia.github.io/CDN/gsplat/",
+        "tags": [
+            "3D Scan"
+        ],
+        "contributors": "Liam Yehudai",
+        "year": "2025",
+        "thumbnail": "assets/thumbnails/Gallery.gif",
+        "iframe": false
+    },
+    {
+        "title": "Isopod DichotomousKey",
+        "link": "https://sbutltmedia.github.io/CDN/Isopod/dichotomousKey.html",
+        "tags": [
+            "Game"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/isopod.gif",
+        "iframe": false
+    },
+    {
+        "title": "ARS205 Virtual Gallery",
+        "link": "https://sbutltmedia.github.io/ARS205/",
+        "tags": [
+            "VR",
+            "3D Scan"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/ARS205.gif",
+        "iframe": false
+    },
+    {
+        "title": "VR Molocules",
+        "link": "https://sbutltmedia.github.io/aframe-glmol-component/",
+        "tags": [
+            "VR",
+            "Tool"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Mol.gif",
+        "iframe": true
+    },
+    {
+        "title": "Book Maker",
+        "link": "https://apps.tlt.stonybrook.edu/bookMaker/IntroToECGInterpretation/#thumb_1",
+        "tags": [
+            "Faculty Tool"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/BookMaker.gif",
+        "iframe": false
+    },
+    {
+        "title": "Anthropology Bone Index",
+        "link": "https://apps.tlt.stonybrook.edu/ANPSM/ANP120%20Skull%20A%20Cranium/",
+        "tags": [
+            "3D Scan"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/skull.gif",
+        "iframe": false
+    },
+    {
+        "title": "Bloom's Taxonomy Wheel",
+        "link": "https://apps.tlt.stonybrook.edu/bloomsTaxonomyWheel/",
+        "tags": [
+            "Faculty Tool"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Bloom.gif",
+        "iframe": false
+    },
+    {
+        "title": "Long Island History Journal",
+        "link": "https://lihj.cc.stonybrook.edu/",
+        "tags": [
+            "Website"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Lihj.gif",
+        "iframe": true
+    },
+    {
+        "title": "Environmental and Climate Justice",
+        "link": "https://envirodangers.studies.stonybrook.edu/wordpress/envirodangers/",
+        "tags": [
+            "Website"
+        ],
+        "contributors": "",
+        "year": "",
+        "thumbnail": "assets/thumbnails/Envirodangers.gif",
+        "iframe": false
+    }
+
+]

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isometric Cube Pattern</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            user-select: none;
+            min-width: 220px;
+            display: none; /* Hidden as requested */
+        }
+        .instruction {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .sub-instruction {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .palette-info {
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            border-left: 4px solid #333;
+        }
+        .palette-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .palette-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+        }
+        .control-group {
+            margin-top: 15px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <div class="instruction">Isometric Pattern</div>
+        <div class="sub-instruction">Click anywhere to remix</div>
+        
+        <div class="palette-info">
+            <div class="palette-label">Current Palette</div>
+            <div class="palette-name" id="paletteNameDisplay">Loading...</div>
+        </div>
+
+        <div class="control-group">
+            <label for="rippleSpeedControl">
+                <span>Ripple Speed</span>
+                <span id="rippleSpeedValue">0.020</span>
+            </label>
+            <input type="range" id="rippleSpeedControl" min="0" max="0.2" step="0.005" value="0.020">
+        </div>
+
+        <div class="control-group">
+            <label for="bounceSpeedControl">
+                <span>Bounce Speed</span>
+                <span id="bounceSpeedValue">0.040</span>
+            </label>
+            <input type="range" id="bounceSpeedControl" min="0" max="0.2" step="0.005" value="0.040">
+        </div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const paletteNameDisplay = document.getElementById('paletteNameDisplay');
+        const rippleSpeedControl = document.getElementById('rippleSpeedControl');
+        const rippleSpeedValue = document.getElementById('rippleSpeedValue');
+        const bounceSpeedControl = document.getElementById('bounceSpeedControl');
+        const bounceSpeedValue = document.getElementById('bounceSpeedValue');
+
+        let width, height;
+        let cubes = [];
+        
+        // Configuration
+        const config = {
+            cubeSize: 35,
+            padding: 0,
+            rippleSpeed: 0.020,
+            bounceSpeed: 0.040,
+            waveFrequency: 0.05,
+            waveAmplitude: 10
+        };
+
+        // State
+        let rippleTime = 0;
+        let bounceTime = 0;
+        let mouse = { x: -1000, y: -1000 };
+        let targetPaletteObj = null;
+        let currentPalette = []; // Array of current interpolated hex strings
+        
+        // Palettes as Objects
+        const palettes = [
+            { name: "Retro Muted", colors: ['#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557'] },
+            { name: "Sunset", colors: ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'] },
+            { name: "Berry", colors: ['#003049', '#d62828', '#f77f00', '#fcbf49', '#eae2b7'] },
+            { name: "Forest", colors: ['#606c38', '#283618', '#fefae0', '#dda15e', '#bc6c25'] },
+            { name: "Ocean", colors: ['#03045e', '#0077b6', '#00b4d8', '#90e0ef', '#caf0f8'] },
+            { name: "Bauhaus-ish", colors: ['#1c1c1c', '#f0f0f0', '#d4af37', '#a02020', '#204060'] },
+            { name: "English Rose", colors: ['#ffcdb2', '#ffb4a2', '#e5989b', '#b5838d', '#6d6875'] },
+            { name: "Americano", colors: ['#2b2d42', '#8d99ae', '#edf2f4', '#ef233c', '#d90429'] },
+            { name: "Midnight Gold", colors: ['#000000', '#14213d', '#fca311', '#e5e5e5', '#ffffff'] },
+            { name: "Cotton Candy", colors: ['#cdb4db', '#ffc8dd', '#ffafcc', '#bde0fe', '#a2d2ff'] },
+            { name: "Tuscan Sun", colors: ['#335c67', '#fff3b0', '#e09f3e', '#9e2a2b', '#540b0e'] },
+            { name: "Soft Vintage", colors: ['#f4f1de', '#e07a5f', '#3d405b', '#81b29a', '#f2cc8f'] },
+            { name: "Lilac Night", colors: ['#22223b', '#4a4e69', '#9a8c98', '#c9ada7', '#f2e9e4'] },
+            { name: "Volcano", colors: ['#6a040f', '#9d0208', '#d00000', '#dc2f02', '#e85d04'] },
+            { name: "Matrix Glitch", colors: ['#006400', '#007200', '#008000', '#38b000', '#70e000'] },
+            { name: "Highlighter", colors: ['#ffbe0b', '#fb5607', '#ff006e', '#8338ec', '#3a86ff'] },
+            { name: "Deep Spice", colors: ['#5f0f40', '#9a031e', '#fb8b24', '#e36414', '#0f4c5c'] },
+            { name: "Classic Blue", colors: ['#0f4c81', '#5e6f85', '#aebbc9', '#e0e5eb', '#ffffff'] },
+            { name: "Dracula Theme", colors: ['#282a36', '#44475a', '#bd93f9', '#ff79c6', '#8be9fd'] },
+            { name: "Nordic Snow", colors: ['#2e3440', '#3b4252', '#434c5e', '#4c566a', '#d8dee9'] },
+            { name: "Brutalist Mono", colors: ['#000000', '#333333', '#666666', '#999999', '#ffffff'] },
+            { name: "Honey Blue", colors: ['#8ecae6', '#219ebc', '#023047', '#ffb703', '#fb8500'] },
+            { name: "Mint Garden", colors: ['#d8f3dc', '#b7e4c7', '#95d5b2', '#74c69d', '#52b788'] },
+            { name: "Cyber Tropics", colors: ['#540d6e', '#ee4266', '#ffd23f', '#3bceac', '#0ead69'] },
+            { name: "Pop Art", colors: ['#1a535c', '#4ecdc4', '#f7fff7', '#ff6b6b', '#ffe66d'] },
+            { name: "Ruby", colors: ['#590d22', '#800f2f', '#a4133c', '#c9184a', '#ff4d6d'] },
+            { name: "TLL", colors: ['#4982b9', '#f6de54', '#df3030', '#d96565', '#fdfeff'] }
+        ];
+
+        function getRandomPalette() {
+            return palettes[Math.floor(Math.random() * palettes.length)];
+        }
+
+        function setPalette(paletteObj) {
+            if (!paletteObj) return;
+            targetPaletteObj = paletteObj;
+            paletteNameDisplay.textContent = paletteObj.name;
+            
+            // If first load, snap immediately
+            if (currentPalette.length === 0) {
+                currentPalette = [...paletteObj.colors];
+            }
+        }
+
+        window.setPaletteByName = (name) => {
+            const palette = palettes.find(p => p.name === name);
+            if (palette) {
+                setPalette(palette);
+            }
+        };
+
+        // Initialize (Bauhaus-ish is index 5)
+        setPalette(palettes[5]);
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            initCubes();
+        }
+
+        class Cube {
+            constructor(x, y, gridX, gridY) {
+                this.x = x;
+                this.y = y;
+                this.gridX = gridX;
+                this.gridY = gridY;
+                this.baseY = y;
+                this.offset = 0;
+                
+                // Assign random colors indices
+                this.colorIndices = [
+                    Math.floor(Math.random() * 5),
+                    Math.floor(Math.random() * 5),
+                    Math.floor(Math.random() * 5)
+                ];
+                
+                this.topShade = 1.2;
+                this.leftShade = 1.0;
+                this.rightShade = 0.8;
+            }
+
+            update() {
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 300;
+
+                let wave = 0;
+                if (dist < maxDist) {
+                    const force = (maxDist - dist) / maxDist;
+                    // Use rippleTime for the mouse interaction wave
+                    wave = Math.sin(dist * 0.05 - rippleTime * 5) * force * config.waveAmplitude * 2;
+                }
+
+                // Use bounceTime for the ambient background movement
+                const ambient = Math.sin(this.gridX * 0.2 + this.gridY * 0.2 + bounceTime) * 5;
+                this.offset = wave + ambient;
+            }
+
+            draw() {
+                const size = config.cubeSize;
+                const angle30 = Math.PI / 6;
+                const dx = size * Math.cos(angle30);
+                const dy = size * Math.sin(angle30);
+
+                const drawX = this.x;
+                const drawY = this.baseY - this.offset;
+
+                // Safe access to current palette colors
+                const getColor = (index, shadeMult) => {
+                    const hex = currentPalette[index % currentPalette.length] || '#000000';
+                    return adjustBrightness(hex, shadeMult);
+                };
+
+                ctx.lineWidth = 1;
+                ctx.lineJoin = 'round';
+
+                // Top Face
+                ctx.beginPath();
+                ctx.moveTo(drawX, drawY - size);
+                ctx.lineTo(drawX + dx, drawY - dy);
+                ctx.lineTo(drawX, drawY);
+                ctx.lineTo(drawX - dx, drawY - dy);
+                ctx.closePath();
+                ctx.fillStyle = getColor(this.colorIndices[0], this.topShade);
+                ctx.fill();
+
+                // Right Face
+                ctx.beginPath();
+                ctx.moveTo(drawX, drawY);
+                ctx.lineTo(drawX + dx, drawY - dy);
+                ctx.lineTo(drawX + dx, drawY - dy + size);
+                ctx.lineTo(drawX, drawY + size);
+                ctx.closePath();
+                ctx.fillStyle = getColor(this.colorIndices[1], this.rightShade);
+                ctx.fill();
+
+                // Left Face
+                ctx.beginPath();
+                ctx.moveTo(drawX, drawY);
+                ctx.lineTo(drawX - dx, drawY - dy);
+                ctx.lineTo(drawX - dx, drawY - dy + size);
+                ctx.lineTo(drawX, drawY + size);
+                ctx.closePath();
+                ctx.fillStyle = getColor(this.colorIndices[2], this.leftShade);
+                ctx.fill();
+            }
+        }
+
+        // Helper to darken/lighten hex color
+        function adjustBrightness(hex, factor) {
+            hex = hex.replace('#', '');
+            if(hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]; // handle shorthand
+            
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+
+            r = Math.min(255, Math.max(0, r * factor));
+            g = Math.min(255, Math.max(0, g * factor));
+            b = Math.min(255, Math.max(0, b * factor));
+
+            const toHex = (c) => {
+                const h = Math.round(c).toString(16);
+                return h.length === 1 ? '0' + h : h;
+            };
+
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+        
+        function lerpColor(a, b, amount) {
+            const ah = a.replace('#', ''), bh = b.replace('#', '');
+            const ar = parseInt(ah.substring(0,2), 16), ag = parseInt(ah.substring(2,4), 16), ab = parseInt(ah.substring(4,6), 16);
+            const br = parseInt(bh.substring(0,2), 16), bg = parseInt(bh.substring(2,4), 16), bb = parseInt(bh.substring(4,6), 16);
+            const rr = ar + amount * (br - ar);
+            const rg = ag + amount * (bg - ag);
+            const rb = ab + amount * (bb - ab);
+            return '#' + ((1 << 24) + (Math.round(rr) << 16) + (Math.round(rg) << 8) + Math.round(rb)).toString(16).slice(1);
+        }
+
+        function initCubes() {
+            cubes = [];
+            const size = config.cubeSize;
+            const dx = size * Math.cos(Math.PI / 6); 
+            const dy = size * Math.sin(Math.PI / 6); 
+            
+            const cols = Math.ceil(width / (dx * 2)) + 2;
+            const rows = Math.ceil(height / (size + dy)) + 4; 
+
+            for (let i = -2; i < rows; i++) {
+                for (let j = -2; j < cols; j++) {
+                    let x = j * dx * 2;
+                    let y = i * (size + dy);
+                    if (i % 2 !== 0) x += dx;
+                    y -= (size + dy); 
+                    cubes.push(new Cube(x, y, j, i));
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Increment separate time variables
+            rippleTime += config.rippleSpeed;
+            bounceTime += config.bounceSpeed;
+
+            // Interpolate colors
+            if (targetPaletteObj) {
+                for(let i=0; i<targetPaletteObj.colors.length; i++) {
+                    if (currentPalette[i] !== targetPaletteObj.colors[i]) {
+                        currentPalette[i] = lerpColor(currentPalette[i], targetPaletteObj.colors[i], 0.05);
+                    }
+                }
+            }
+            
+            // Background color (dark version of the 5th color in palette)
+            ctx.fillStyle = adjustBrightness(currentPalette[4], 0.2);
+            ctx.fillRect(0, 0, width, height);
+
+            cubes.forEach(cube => {
+                cube.update();
+                cube.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Event Listeners
+        window.addEventListener('resize', resize);
+        
+        // This function will be called by the parent window (index.html)   
+        window.updateMousePosition = function(x, y) {  
+            mouse.x = x; 
+            mouse.y = y;
+        }; 
+
+        // Ripple Speed Control
+        rippleSpeedControl.addEventListener('input', (e) => {
+            config.rippleSpeed = parseFloat(e.target.value);
+            rippleSpeedValue.textContent = config.rippleSpeed.toFixed(3);
+        });
+
+        // Bounce Speed Control
+        bounceSpeedControl.addEventListener('input', (e) => {
+            config.bounceSpeed = parseFloat(e.target.value);
+            bounceSpeedValue.textContent = config.bounceSpeed.toFixed(3);
+        });
+
+        // Click to change palette (ignore clicks on control panel)
+        window.addEventListener('click', (e) => {
+            if (e.target.closest('#controls')) return;
+            
+            const newPalette = getRandomPalette();
+            // Don't pick the same one twice in a row if possible
+            if(newPalette.name !== targetPaletteObj.name) {
+                setPalette(newPalette);
+            } else {
+                setPalette(getRandomPalette());
+            }
+        });
+
+        // Start
+        resize();
+        animate();
+
+    </script>
+</body>
+</html>
