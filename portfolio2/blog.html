@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teaching & Learning Lab | Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Added FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto+Mono:wght@400;500&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define color variables for light and dark themes */
+        :root {
+            --glass-opacity: 0.8;
+            --bg-color: #ffffff;
+            --bg-color-rgb: 255, 255, 255;
+            --text-color: #1a1a1a;
+            --primary-color: #df3030; /* Red */
+            --secondary-color: #3556ff; /* Blue */
+            --tertiary-color: #ffff00; /* Yellow */
+            --accent-color: #333333;
+            --card-bg: #f7f7f7;
+            --card-border: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark {
+            --bg-color: #1a1a1a;
+            --bg-color-rgb: 26, 26, 26;
+            --text-color: #ffffff;
+            --primary-color: #ff3333; /* Brighter Red */
+            --secondary-color: #3366ff; /* Brighter Blue */
+            --tertiary-color: #ffff66; /* Brighter Yellow */
+            --accent-color: #cccccc;
+            --card-bg: #2a2a2a;
+            --card-border: #444444;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-panel {
+            background-color: rgba(var(--bg-color-rgb), var(--glass-opacity));
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+        }
+        
+        /* General styling */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Modal styling */
+        #modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+        }
+        #modal-container.open #modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* Theme switcher styling */
+        .theme-switcher {
+            width: 50px;
+            height: 26px;
+            background-color: var(--accent-color);
+            border-radius: 13px;
+            padding: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .theme-switcher-dot {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        html.dark .theme-switcher-dot {
+            transform: translateX(24px);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+        
+        .blog-card {
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .blog-card:hover {
+             transform: translateY(-4px);
+             box-shadow: 0 8px 24px var(--shadow-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <iframe src="background.html" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; border: none; pointer-events: none;"></iframe>
+
+    <!-- Header -->
+    <header id="header" class="sticky top-0 z-40 bg-[var(--bg-color)]/80 backdrop-blur-md border-b border-[var(--card-border)]">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold tracking-wider" style="color: var(--text-color);">
+                TEACHING & LEARNING LAB
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="index.html#work" class="text-lg hover:text-[var(--primary-color)] transition-colors">Our Work</a>
+                <a href="#" class="text-lg font-bold text-[var(--primary-color)] transition-colors">Blog</a>
+                <a href="index.html#about" class="text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
+                <div id="theme-switcher" class="theme-switcher">
+                    <div class="theme-switcher-dot"></div>
+                </div>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="index.html#work" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">Our Work</a>
+            <a href="#" class="block py-2 text-lg font-bold text-[var(--primary-color)] transition-colors">Blog</a>
+            <a href="index.html#about" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
+            <div class="flex items-center mt-2 space-x-4">
+                 <span>Theme:</span>
+                 <div id="theme-switcher-mobile" class="theme-switcher">
+                    <div class="theme-switcher-dot"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <h1 class="text-5xl font-bold mb-16 text-center">Blog</h1>
+        
+        <!-- Blog List -->
+        <div id="blog-list" class="space-y-12 max-w-5xl mx-auto">
+            <!-- Blog posts will be dynamically inserted here -->
+        </div>
+
+    </main>
+    
+    <footer class="glass-panel text-center py-6 mt-12 rounded-t-lg p-4">
+        <p style="color: var(--accent-color);">&copy; 2025 Teaching & Learning Lab. All Rights Reserved.</p>
+    </footer>
+
+
+    <!-- Modal -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-backdrop" class="fixed inset-0 bg-black/70"></div>
+        <div id="modal-content" class="relative bg-[var(--bg-color)] rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-[var(--card-border)] flex justify-between items-center">
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
+                    <p class="font-mono text-sm" style="color: var(--accent-color);">
+                        <span id="modal-date"></span> &mdash; <span id="modal-author"></span>
+                    </p>
+                </div>
+                <button id="modal-close-btn" class="text-2xl hover:text-[var(--primary-color)]">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div id="modal-body-content" class="mb-6 text-lg leading-relaxed">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- DATA ---
+            let blogPosts = [];
+            let snippets = {};
+
+            try {
+                const blogResponse = await fetch('BlogData.json');
+                blogPosts = await blogResponse.json();
+                const snippetsResponse = await fetch('Snippets.json');
+                snippets = await snippetsResponse.json();
+            } catch (error) {
+                console.error('Error fetching blog data:', error);
+            }
+
+            // --- ELEMENTS ---
+            const blogList = document.getElementById('blog-list');
+            const modalContainer = document.getElementById('modal-container');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDate = document.getElementById('modal-date');
+            const modalAuthor = document.getElementById('modal-author');
+            const modalBodyContent = document.getElementById('modal-body-content');
+
+            // --- FUNCTIONS ---
+            function renderBlogPosts() {
+                blogList.innerHTML = '';
+
+                [...blogPosts].reverse().forEach((post, index) => {
+                    const snippet = snippets[post.fileName] || 'No preview available.';
+                    const isImageLeft = index % 2 === 0;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel blog-card rounded-lg overflow-hidden cursor-pointer p-0 flex flex-col md:flex-row h-auto md:h-72';
+                    card.dataset.filename = post.fileName;
+                    
+                    const imageHtml = `
+                        <div class="w-full md:w-2/5 h-48 md:h-full relative overflow-hidden">
+                            <img src="${post.thumbnail}" alt="${post.title}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                        </div>
+                    `;
+                    
+                    const contentHtml = `
+                        <div class="w-full md:w-3/5 p-8 flex flex-col justify-center text-left">
+                            <div class="flex items-center text-sm font-mono mb-2" style="color: var(--accent-color);">
+                                <span>${post.date}</span>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-3 hover:text-[var(--primary-color)] transition-colors">${post.title}</h2>
+                            <p class="text-base line-clamp-3 mb-4 flex-grow">${snippet}</p>
+                             <div class="text-sm font-bold" style="color: var(--secondary-color);">
+                                By ${post.authors.join(', ')}
+                            </div>
+                        </div>
+                    `;
+
+                    if (isImageLeft) {
+                        card.innerHTML = imageHtml + contentHtml;
+                    } else {
+                        // For right image, we use flex-row-reverse on desktop
+                        card.classList.add('md:flex-row-reverse');
+                        card.innerHTML = imageHtml + contentHtml;
+                    }
+
+                    blogList.appendChild(card);
+                    
+                    // Add Click Event
+                    card.addEventListener('click', () => {
+                         openModal(post.fileName);
+                    });
+                });
+            }
+
+            async function openModal(fileName) {
+                const post = blogPosts.find(p => p.fileName === fileName);
+                if (!post) return;
+
+                // Update URL Hash without scrolling
+                history.pushState(null, null, '#' + fileName);
+
+                modalTitle.textContent = post.title;
+                modalDate.textContent = post.date;
+                modalAuthor.textContent = 'By ' + post.authors.join(', ');
+                
+                // Show loading state
+                modalBodyContent.innerHTML = '<div class="text-center p-8">Loading article...</div>';
+                modalContainer.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => modalContainer.classList.add('open'), 10);
+
+                try {
+                    const response = await fetch(`blogs/${fileName}.html`);
+                    if (!response.ok) throw new Error('Article not found');
+                    const htmlContent = await response.text();
+                    modalBodyContent.innerHTML = htmlContent;
+                } catch (err) {
+                    modalBodyContent.innerHTML = '<div class="text-center text-red-500 p-8">Error loading article content.</div>';
+                }
+            }
+
+            function closeModal() {
+                modalContainer.classList.remove('open');
+                document.body.style.overflow = '';
+                
+                // Remove hash
+                history.pushState(null, null, 'blog.html');
+
+                 // Wait for transition to finish before hiding
+                setTimeout(() => {
+                    modalContainer.classList.add('hidden');
+                    modalBodyContent.innerHTML = ''; 
+                }, 300);
+            }
+
+            // --- DEEP LINKING ---
+            function checkHash() {
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    // Check if hash matches a blog post
+                    const post = blogPosts.find(p => p.fileName === hash);
+                    if (post) {
+                        openModal(hash);
+                    }
+                }
+            }
+
+            // --- THEME SWITCHER LOGIC ---
+            const themeSwitchers = [document.getElementById('theme-switcher'), document.getElementById('theme-switcher-mobile')];
+            const htmlEl = document.documentElement;
+            const backgroundIframe = document.querySelector('iframe[src="background.html"]');
+
+            const syncBackgroundPalette = (theme) => {
+                const paletteName = theme === 'dark' ? 'Bauhaus-ish' : 'TLL';
+                if (backgroundIframe && backgroundIframe.contentWindow && typeof backgroundIframe.contentWindow.setPaletteByName === 'function') {
+                    backgroundIframe.contentWindow.setPaletteByName(paletteName);
+                }
+            };
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlEl.classList.add('dark');
+                    htmlEl.classList.remove('light');
+                } else {
+                    htmlEl.classList.add('light');
+                    htmlEl.classList.remove('dark');
+                }
+                syncBackgroundPalette(theme);
+            };
+            
+            // Apply theme on initial load
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+
+            // Add listeners for theme switching
+            themeSwitchers.forEach(switcher => {
+                switcher.addEventListener('click', () => {
+                    const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                });
+            });
+
+            // Also sync palette when iframe finishes loading
+            if (backgroundIframe) {
+                backgroundIframe.addEventListener('load', () => {
+                    const currentTheme = htmlEl.classList.contains('dark') ? 'dark' : 'light';
+                    syncBackgroundPalette(currentTheme);
+                });
+            }
+
+
+            // --- EVENT LISTENERS ---
+            document.addEventListener('mousemove', (e) => {
+                if (backgroundIframe && backgroundIframe.contentWindow && typeof backgroundIframe.contentWindow.updateMousePosition === 'function') {
+                    backgroundIframe.contentWindow.updateMousePosition(e.clientX, e.clientY);
+                }
+            });
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalBackdrop.addEventListener('click', closeModal);
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- INITIAL RENDER ---
+            await renderBlogPosts();
+            checkHash(); // Check for deep links after data is loaded
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bauhaus Block Editor</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bauhaus: {
+                            red: '#df3030',
+                            blue: '#3556ff',
+                            yellow: '#ffff00',
+                            dark: '#1a1a1a',
+                            light: '#f7f7f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        mono: ['Roboto Mono', 'monospace'],
+                    },
+                    animation: {
+                        'float-slow': 'float-slow 15s ease-in-out infinite',
+                        'float-medium': 'float-medium 12s ease-in-out infinite',
+                        'float-fast': 'float-fast 10s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'float-slow': { '0%, 100%': { transform: 'translate(0, 0)' }, '50%': { transform: 'translate(20px, 40px)' } },
+                        'float-medium': { '0%, 100%': { transform: 'translate(0, 0) rotate(12deg)' }, '50%': { transform: 'translate(-30px, 20px) rotate(0deg)' } },
+                        'float-fast': { '0%, 100%': { transform: 'translate(0, 0)' }, '50%': { transform: 'translate(40px, -20px)' } },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles */
+        body { font-family: 'Poppins', sans-serif; color: #1a1a1a; overflow: hidden; }
+        
+        .glass-panel {
+            background-color: rgba(255, 255, 255, var(--glass-opacity, 0.85));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #df3030; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b01010; }
+
+        .editor-input {
+            outline: none;
+            transition: all 0.2s;
+        }
+        .editor-input:focus {
+            background: rgba(53, 86, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        /* Drag and Drop Visuals */
+        .dragging {
+            opacity: 0.5;
+            border: 2px dashed #3556ff;
+            background: #f0f4ff;
+        }
+    </style>
+</head>
+<body class="h-screen w-full relative bg-white">
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none bg-white">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-bauhaus-red rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float-slow"></div>
+        <div class="absolute top-1/3 right-1/4 w-64 h-64 bg-bauhaus-blue transform rotate-12 mix-blend-multiply filter blur-xl opacity-10 animate-float-medium"></div>
+        <div class="absolute bottom-20 left-1/3 w-48 h-48 bg-bauhaus-yellow rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float-fast"></div>
+        <div class="absolute top-1/2 left-10 w-20 h-20 border-4 border-bauhaus-dark opacity-5"></div>
+        <div class="absolute bottom-10 right-10 w-40 h-40 bg-bauhaus-light rounded-lg rotate-45 opacity-50"></div>
+    </div>
+
+    <!-- App Wrapper -->
+    <div class="flex h-full relative z-10">
+
+        <!-- LEFT PANEL: Editor -->
+        <div id="editor-panel" class="absolute md:relative z-20 h-full flex flex-col border-r border-gray-200 transition-all duration-500 ease-in-out glass-panel w-full md:w-[30%] translate-x-0">
+            
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-white/50">
+                <div class="flex items-center gap-2">
+                    <a href="blog.html" class="p-1 mr-1 text-gray-400 hover:text-bauhaus-blue transition-colors" title="Back to Blog">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </a>
+                    <div class="w-6 h-6 bg-bauhaus-red"></div>
+                    <div class="w-6 h-6 bg-bauhaus-blue rounded-full"></div>
+                    <div class="w-6 h-6 bg-bauhaus-yellow transform rotate-45"></div>
+                    <h1 class="ml-2 font-bold tracking-tight text-lg font-mono">EDITOR.MODE</h1>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="app.deletePost()" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Delete Post">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                    <button id="close-mobile-editor" class="md:hidden p-2 hover:bg-gray-100 rounded">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Block List -->
+            <div id="block-list" class="flex-1 overflow-y-auto p-4 space-y-2">
+                <!-- Blocks will be injected here via JS -->
+            </div>
+
+            <!-- Add Block Footer -->
+            <div class="p-4 border-t border-gray-100 bg-white/50">
+                <p class="text-xs font-mono text-gray-500 mb-2 uppercase tracking-wider">Add Block</p>
+                <div class="grid grid-cols-5 gap-2">
+                    <button onclick="app.addBlock('paragraph')" class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white transition-all hover:shadow-md group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-[#1a1a1a] text-white">
+                            <i data-lucide="type" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600 uppercase">Text</span>
+                    </button>
+                    <button onclick="app.addBlock('header')" class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white transition-all hover:shadow-md group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-bauhaus-red text-white">
+                            <i data-lucide="heading" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600 uppercase">Head</span>
+                    </button>
+                    <button onclick="app.addBlock('image')" class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white transition-all hover:shadow-md group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-bauhaus-blue text-white">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600 uppercase">Img</span>
+                    </button>
+                    <button onclick="app.addBlock('text-image-right')" class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white transition-all hover:shadow-md group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-amber-500 text-white">
+                            <i data-lucide="layout-template" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600 uppercase">Split</span>
+                    </button>
+                    <button onclick="app.addBlock('iframe')" class="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white transition-all hover:shadow-md group">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-emerald-500 text-white">
+                            <i data-lucide="globe" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-[9px] font-mono text-gray-600 uppercase">Embed</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Preview -->
+        <div id="preview-panel" class="flex-1 h-full overflow-y-auto transition-all duration-500 ease-in-out relative md:w-[70%]">
+            
+            <!-- Floating Settings Toggle -->
+            <button id="toggle-editor" class="absolute top-4 left-4 z-50 bg-bauhaus-dark text-white p-3 shadow-lg hover:bg-[#333] transition-all hidden">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Collapse Handle (Desktop) -->
+            <button id="collapse-handle" class="hidden md:flex absolute top-1/2 -left-3 z-50 bg-bauhaus-dark text-white p-1 rounded-full shadow-lg hover:bg-[#333] items-center justify-center h-8 w-8 cursor-pointer">
+                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+            </button>
+
+            <!-- Content Area -->
+            <div class="max-w-4xl mx-auto py-12 px-6 md:px-12 min-h-full">
+                <header class="mb-12 border-b-4 border-bauhaus-dark pb-6">
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <h1 class="text-5xl font-bold tracking-tighter mb-2">THE BLOG.</h1>
+                            <p class="font-mono text-sm text-bauhaus-red">VOL. 2026 — BAUHAUS EDITION</p>
+                        </div>
+                        <div class="hidden md:block w-16 h-16 bg-bauhaus-blue rounded-full mix-blend-multiply opacity-80"></div>
+                    </div>
+                </header>
+
+                <div id="preview-content" class="space-y-8">
+                    <!-- Preview Blocks Injected Here -->
+                </div>
+
+                <footer class="mt-20 pt-10 border-t border-gray-200 text-center font-mono text-xs text-gray-400">
+                    DESIGNED WITH HTML & TAILWIND
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opacity Widget -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 group">
+        <div class="bg-bauhaus-dark text-white p-3 shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-4 border-2 border-white">
+            <i data-lucide="palette" class="w-5 h-5"></i>
+            <div class="flex flex-col w-32">
+                <div class="flex justify-between text-[10px] font-mono mb-1 uppercase text-gray-400">
+                    <span>Glass Opacity</span>
+                    <span id="opacity-label">85%</span>
+                </div>
+                <input 
+                    type="range" min="0.3" max="1" step="0.05" value="0.85" 
+                    id="opacity-slider"
+                    class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-bauhaus-red"
+                >
+            </div>
+        </div>
+    </div>
+
+    <!-- TEMPLATES (Hidden) -->
+    <!-- Used to generate block HTML strings in JS -->
+
+    <script>
+        // --- DATA & STATE ---
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+        
+        const DEFAULT_CONTENT = {
+            'header': { text: 'New Header', level: 'h2', align: 'left' },
+            'paragraph': { text: 'Start writing...', align: 'left' },
+            'image': { src: 'https://via.placeholder.com/600x400', caption: 'Enter caption...' },
+            'text-image-left': { text: 'Descriptive text goes here.', src: 'https://via.placeholder.com/300x300', caption: '' },
+            'text-image-right': { text: 'Descriptive text goes here.', src: 'https://via.placeholder.com/300x300', caption: '' },
+            'iframe': { src: '', showPreview: false }
+        };
+
+        const INITIAL_BLOCKS = [
+            { id: 'header-1', type: 'header', content: { text: 'The Bauhaus Philosophy', level: 'h1', align: 'left' } },
+            { id: 'text-img-1', type: 'text-image-left', content: { 
+                text: 'Form follows function. The movement prioritized simplicity and geometric purity.', 
+                src: 'https://images.unsplash.com/photo-1554188248-986adbb73be0?auto=format&fit=crop&q=80&w=800', 
+                caption: 'Geometric architecture' 
+            }},
+            { id: 'para-1', type: 'paragraph', content: { text: 'Bauhaus was an influential art and design movement that began in 1919 in Weimar, Germany. The movement encouraged teachers and students to pursue their crafts together in design studios and workshops.', align: 'left' } }
+        ];
+
+        class App {
+            constructor() {
+                this.blocks = [...INITIAL_BLOCKS];
+                this.isEditorOpen = true;
+                this.glassOpacity = 0.85;
+                this.draggedBlockIndex = null;
+                
+                // Cache DOM elements
+                this.editorPanel = document.getElementById('editor-panel');
+                this.previewPanel = document.getElementById('preview-panel');
+                this.blockList = document.getElementById('block-list');
+                this.previewContent = document.getElementById('preview-content');
+                
+                this.init();
+            }
+
+            init() {
+                this.renderAll();
+                this.setupEventListeners();
+                lucide.createIcons();
+            }
+
+            // --- RENDERERS ---
+
+            renderAll() {
+                this.renderEditorList();
+                this.renderPreviewList();
+                lucide.createIcons();
+            }
+
+            renderEditorList() {
+                this.blockList.innerHTML = '';
+                this.blocks.forEach((block, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'relative group mb-1';
+                    el.innerHTML = this.getEditorBlockHTML(block, index);
+                    
+                    // Attach event listeners for inputs
+                    const inputs = el.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', (e) => this.handleInput(block.id, e.target.dataset.field, e.target.value));
+                    });
+
+                    // Attach Drag Events
+                    const dragHandle = el.querySelector('.drag-handle');
+                    dragHandle.addEventListener('dragstart', (e) => this.onDragStart(e, index));
+                    el.addEventListener('dragover', (e) => this.onDragOver(e, index));
+                    el.addEventListener('dragend', (e) => this.onDragEnd(e));
+                    el.addEventListener('drop', (e) => e.preventDefault());
+
+                    this.blockList.appendChild(el);
+                });
+
+                // End of content marker
+                const endMarker = document.createElement('div');
+                endMarker.className = "h-20 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-gray-400 mt-4";
+                endMarker.innerHTML = '<span class="text-sm font-mono">End of Content</span>';
+                this.blockList.appendChild(endMarker);
+            }
+
+            renderPreviewList() {
+                this.previewContent.innerHTML = '';
+                this.blocks.forEach(block => {
+                    const el = document.createElement('div');
+                    el.id = `preview-${block.id}`;
+                    el.innerHTML = this.getPreviewBlockHTML(block);
+                    this.previewContent.appendChild(el);
+                });
+            }
+
+            // --- HTML GENERATORS ---
+
+            getEditorBlockHTML(block, index) {
+                const c = block.content;
+                let contentHTML = '';
+
+                // Toolbar HTML (Generic)
+                const toolbar = `
+                    <div class="flex justify-end gap-1 mb-1 text-gray-400">
+                        <button onclick="app.updateBlockAlignment('${block.id}', 'left')" class="p-1 hover:text-bauhaus-blue ${c.align === 'left' ? 'text-bauhaus-blue' : ''}"><i data-lucide="align-left" class="w-3 h-3"></i></button>
+                        <button onclick="app.updateBlockAlignment('${block.id}', 'center')" class="p-1 hover:text-bauhaus-blue ${c.align === 'center' ? 'text-bauhaus-blue' : ''}"><i data-lucide="align-center" class="w-3 h-3"></i></button>
+                        <button onclick="app.updateBlockAlignment('${block.id}', 'right')" class="p-1 hover:text-bauhaus-blue ${c.align === 'right' ? 'text-bauhaus-blue' : ''}"><i data-lucide="align-right" class="w-3 h-3"></i></button>
+                    </div>
+                `;
+
+                if (block.type === 'header') {
+                    contentHTML = `
+                        ${toolbar}
+                        <input data-field="text" value="${c.text}" class="w-full bg-transparent font-bold text-lg border-none focus:ring-0 editor-input p-1" placeholder="Header Text">
+                        <div class="flex gap-2 mt-2">
+                            ${['h1', 'h2', 'h3'].map(h => `
+                                <button onclick="app.updateBlockLevel('${block.id}', '${h}')" class="text-xs px-2 py-1 rounded font-mono ${c.level === h ? 'bg-bauhaus-dark text-white' : 'bg-gray-100'}">${h.toUpperCase()}</button>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (block.type === 'paragraph') {
+                    contentHTML = `
+                        ${toolbar}
+                        <textarea data-field="text" class="w-full bg-transparent text-sm min-h-[80px] resize-none border-none focus:ring-0 editor-input p-1" placeholder="Type here...">${c.text}</textarea>
+                    `;
+                } else if (block.type === 'image') {
+                    contentHTML = `
+                        <div class="space-y-2">
+                            <input data-field="src" value="${c.src}" class="w-full bg-white border border-gray-200 text-xs p-1.5 rounded font-mono" placeholder="Image URL">
+                            <input data-field="caption" value="${c.caption}" class="w-full bg-transparent text-xs border-b border-gray-200 italic p-1" placeholder="Image Caption">
+                            ${c.src ? `<img src="${c.src}" class="w-full h-24 object-cover rounded bg-gray-100 mt-2">` : ''}
+                        </div>
+                    `;
+                } else if (block.type.includes('text-image')) {
+                     contentHTML = `
+                        <div class="space-y-2">
+                            <div class="flex gap-2 mb-2">
+                                <button onclick="app.changeBlockType('${block.id}', 'text-image-left')" class="text-xs p-1 flex-1 border ${block.type === 'text-image-left' ? 'bg-bauhaus-blue text-white border-bauhaus-blue' : 'border-gray-200'}">Left</button>
+                                <button onclick="app.changeBlockType('${block.id}', 'text-image-right')" class="text-xs p-1 flex-1 border ${block.type === 'text-image-right' ? 'bg-bauhaus-blue text-white border-bauhaus-blue' : 'border-gray-200'}">Right</button>
+                            </div>
+                            <input data-field="src" value="${c.src}" class="w-full bg-white border border-gray-200 text-xs p-1.5 rounded font-mono" placeholder="Image URL">
+                            <textarea data-field="text" class="w-full bg-transparent text-sm min-h-[60px] resize-none border-none focus:ring-0 editor-input p-1" placeholder="Column Text...">${c.text}</textarea>
+                        </div>
+                    `;
+                } else if (block.type === 'iframe') {
+                    contentHTML = `
+                         <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <input data-field="src" value="${c.src}" class="flex-1 bg-white border border-gray-200 text-xs p-1.5 rounded font-mono" placeholder="https://example.com">
+                            </div>
+                            <button onclick="app.toggleIframePreview('${block.id}')" class="flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${c.showPreview ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
+                                ${c.showPreview ? 'Preview On' : 'Preview Off'}
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button onclick="app.addBlock('paragraph', ${index})" class="bg-bauhaus-blue text-white rounded-full p-1 shadow-sm hover:scale-110"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                    </div>
+                    <div class="relative flex items-start gap-2 p-3 rounded-md border border-transparent hover:bg-white/80 hover:border-gray-300 transition-all duration-200">
+                        <div class="mt-1 text-gray-300 hover:text-bauhaus-dark cursor-grab active:cursor-grabbing drag-handle" draggable="true">
+                            <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">${block.type}</span>
+                                <button onclick="app.deleteBlock('${block.id}')" class="text-red-400 hover:text-red-600"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </div>
+                            ${contentHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
+            getPreviewBlockHTML(block) {
+                const c = block.content;
+                if (block.type === 'header') {
+                    const sizes = { h1: 'text-4xl', h2: 'text-3xl', h3: 'text-2xl' };
+                    const underline = c.level === 'h1' ? '<div class="absolute -bottom-2 left-0 w-1/3 h-2 bg-bauhaus-red"></div>' : '';
+                    return `<div style="text-align: ${c.align}">
+                                <${c.level} class="${sizes[c.level]} font-bold text-bauhaus-dark mb-4 relative inline-block">
+                                    ${c.text} ${underline}
+                                </${c.level}>
+                            </div>`;
+                }
+                if (block.type === 'paragraph') {
+                    return `<p class="text-lg leading-relaxed text-gray-700 mb-4" style="text-align: ${c.align}">${c.text}</p>`;
+                }
+                if (block.type === 'image') {
+                    return `<figure class="my-8">
+                                <img src="${c.src}" alt="${c.caption}" class="w-full h-auto rounded-lg shadow-sm">
+                                ${c.caption ? `<figcaption class="mt-2 text-sm font-mono text-gray-500 border-l-2 border-bauhaus-yellow pl-3">${c.caption}</figcaption>` : ''}
+                            </figure>`;
+                }
+                if (block.type === 'text-image-left') {
+                    return `<div class="flex flex-col md:flex-row gap-8 my-8 items-center">
+                                <div class="md:w-1/2"><img src="${c.src}" class="w-full h-auto rounded-lg shadow-sm object-cover aspect-[4/3]"></div>
+                                <div class="md:w-1/2">
+                                    <p class="text-lg leading-relaxed text-gray-700">${c.text}</p>
+                                    ${c.caption ? `<p class="mt-2 text-xs font-mono text-gray-400">${c.caption}</p>` : ''}
+                                </div>
+                            </div>`;
+                }
+                if (block.type === 'text-image-right') {
+                    return `<div class="flex flex-col md:flex-row-reverse gap-8 my-8 items-center">
+                                <div class="md:w-1/2"><img src="${c.src}" class="w-full h-auto rounded-lg shadow-sm object-cover aspect-[4/3]"></div>
+                                <div class="md:w-1/2">
+                                    <p class="text-lg leading-relaxed text-gray-700">${c.text}</p>
+                                </div>
+                            </div>`;
+                }
+                if (block.type === 'iframe') {
+                    return `<div class="my-8 w-full border-2 border-black rounded bg-gray-50 overflow-hidden">
+                                <div class="bg-bauhaus-dark text-white px-3 py-1 text-xs font-mono flex items-center justify-between">
+                                    <span>EMBED SOURCE</span>
+                                    <div class="flex gap-1"><div class="w-2 h-2 rounded-full bg-bauhaus-red"></div><div class="w-2 h-2 rounded-full bg-bauhaus-yellow"></div></div>
+                                </div>
+                                ${c.showPreview 
+                                    ? `<iframe src="${c.src}" class="w-full h-64 md:h-96 border-0"></iframe>` 
+                                    : `<div class="h-48 flex flex-col items-center justify-center text-gray-400 gap-2"><i data-lucide="monitor" class="w-8 h-8"></i><span class="font-mono text-sm">PREVIEW HIDDEN</span></div>`}
+                            </div>`;
+                }
+                return '';
+            }
+
+            // --- EVENT ACTIONS ---
+
+            handleInput(id, field, value) {
+                const block = this.blocks.find(b => b.id === id);
+                if (block) {
+                    block.content[field] = value;
+                    // Smart update: Only update the specific preview block to prevent re-rendering the editor and losing focus
+                    const previewEl = document.getElementById(`preview-${id}`);
+                    if (previewEl) {
+                        previewEl.innerHTML = this.getPreviewBlockHTML(block);
+                        lucide.createIcons(); // Re-init icons for the updated preview block
+                    }
+                }
+            }
+
+            addBlock(type, index = null) {
+                const newBlock = { id: generateId(), type, content: { ...DEFAULT_CONTENT[type] } };
+                if (index !== null) {
+                    this.blocks.splice(index, 0, newBlock);
+                } else {
+                    this.blocks.push(newBlock);
+                }
+                this.renderAll();
+                // Scroll new block into view (simple version)
+                setTimeout(() => {
+                    const inputs = document.querySelectorAll('#block-list input, #block-list textarea');
+                    if (inputs.length > 0) inputs[inputs.length - 1].focus();
+                }, 50);
+            }
+
+            deleteBlock(id) {
+                this.blocks = this.blocks.filter(b => b.id !== id);
+                this.renderAll();
+            }
+
+            deletePost() {
+                if (confirm("Are you sure you want to delete this post?\n(This is a prototype action)")) {
+                    this.blocks = [
+                        { id: generateId(), type: 'header', content: { text: 'New Post', level: 'h1', align: 'left' } },
+                        { id: generateId(), type: 'paragraph', content: { text: 'Start writing...', align: 'left' } }
+                    ];
+                    this.renderAll();
+                }
+            }
+
+            updateBlockLevel(id, level) {
+                const block = this.blocks.find(b => b.id === id);
+                if (block) { block.content.level = level; this.renderAll(); }
+            }
+
+            updateBlockAlignment(id, align) {
+                const block = this.blocks.find(b => b.id === id);
+                if (block) { block.content.align = align; this.renderAll(); }
+            }
+
+            changeBlockType(id, type) {
+                const block = this.blocks.find(b => b.id === id);
+                if (block) { block.type = type; this.renderAll(); }
+            }
+
+            toggleIframePreview(id) {
+                const block = this.blocks.find(b => b.id === id);
+                if (block) { block.content.showPreview = !block.content.showPreview; this.renderAll(); }
+            }
+
+            // --- DRAG AND DROP ---
+
+            onDragStart(e, index) {
+                this.draggedBlockIndex = index;
+                e.target.closest('.group').classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+
+            onDragOver(e, index) {
+                e.preventDefault();
+                if (this.draggedBlockIndex === null || this.draggedBlockIndex === index) return;
+                
+                // Swap logic
+                const draggedBlock = this.blocks[this.draggedBlockIndex];
+                this.blocks.splice(this.draggedBlockIndex, 1);
+                this.blocks.splice(index, 0, draggedBlock);
+                
+                // Update index
+                this.draggedBlockIndex = index;
+                
+                // Re-render editor list to show movement
+                this.renderEditorList();
+                this.renderPreviewList();
+                lucide.createIcons();
+            }
+
+            onDragEnd(e) {
+                this.draggedBlockIndex = null;
+                document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+            }
+
+            setupEventListeners() {
+                // UI Toggles
+                const closeBtn = document.getElementById('close-mobile-editor');
+                const toggleBtn = document.getElementById('toggle-editor');
+                const collapseBtn = document.getElementById('collapse-handle');
+                const opacitySlider = document.getElementById('opacity-slider');
+                const opacityLabel = document.getElementById('opacity-label');
+
+                const toggleEditor = (open) => {
+                    this.isEditorOpen = open;
+                    if (open) {
+                        this.editorPanel.classList.remove('-translate-x-full', 'w-0', 'md:w-0', 'overflow-hidden');
+                        this.editorPanel.classList.add('w-full', 'md:w-[30%]', 'translate-x-0');
+                        this.previewPanel.classList.add('md:w-[70%]');
+                        this.previewPanel.classList.remove('w-full');
+                        toggleBtn.classList.add('hidden');
+                        collapseBtn.classList.remove('hidden');
+                    } else {
+                        this.editorPanel.classList.add('-translate-x-full', 'w-0', 'md:w-0', 'overflow-hidden');
+                        this.editorPanel.classList.remove('w-full', 'md:w-[30%]', 'translate-x-0');
+                        this.previewPanel.classList.remove('md:w-[70%]');
+                        this.previewPanel.classList.add('w-full');
+                        toggleBtn.classList.remove('hidden');
+                        collapseBtn.classList.add('hidden');
+                    }
+                };
+
+                closeBtn.addEventListener('click', () => toggleEditor(false));
+                toggleBtn.addEventListener('click', () => toggleEditor(true));
+                collapseBtn.addEventListener('click', () => toggleEditor(false));
+
+                // Opacity Slider
+                opacitySlider.addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    document.documentElement.style.setProperty('--glass-opacity', val);
+                    opacityLabel.innerText = Math.round(val * 100) + '%';
+                });
+            }
+        }
+
+        // Initialize App
+        const app = new App();
+    </script>
+</body>
+</html>

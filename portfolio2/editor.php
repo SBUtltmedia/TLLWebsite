@@ -213,6 +213,7 @@ $formDescription = $editingDescription;
     <div class="sidebar">
         <h2>Projects</h2>
         <a href="editor.php" class="btn-new">+ New Project</a>
+        <a href="blogEditor.php" class="btn-new" style="background-color: #6610f2; margin-left: 5px;">Go to Blog Editor</a>
         <ul class="project-list">
             <?php foreach ($projects as $p): ?>
                 <li>

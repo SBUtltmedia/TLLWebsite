@@ -1,0 +1,104 @@
+#ddev-generated
+# If you remove the ddev-generated line above you
+# are responsible for maintaining this file. DDEV will not then
+# update it, for example if you add `additional_hostnames`, etc.
+
+http:
+  routers:
+    portfolio2-web-80-http:
+      entrypoints:
+        - http-80
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-web-80"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "portfolio2-redirectHttps"
+    portfolio2-web-8025-http:
+      entrypoints:
+        - http-8025
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-web-8025"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "portfolio2-redirectHttps"
+    portfolio2-xhgui-80-http:
+      entrypoints:
+        - http-8143
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-xhgui-80"
+      ruleSyntax: v3
+      tls: false
+      # middlewares:
+      #   - "portfolio2-redirectHttps"
+    
+    
+    
+    portfolio2-web-80-https:
+      entrypoints:
+        - http-443
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-web-80"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    portfolio2-web-8025-https:
+      entrypoints:
+        - http-8026
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-web-8025"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    
+    portfolio2-xhgui-80-https:
+      entrypoints:
+        - http-8142
+      rule: HostRegexp(`^portfolio2\.ddev\.site$`)
+      
+      service: "portfolio2-xhgui-80"
+      ruleSyntax: v3
+      
+      tls: true
+      
+    
+
+  middlewares:
+    portfolio2-redirectHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    portfolio2-web-80:
+      loadbalancer:
+        servers:
+          - url: http://ddev-portfolio2-web:80
+        
+    portfolio2-web-8025:
+      loadbalancer:
+        servers:
+          - url: http://ddev-portfolio2-web:8025
+        
+    
+    
+    portfolio2-xhgui-80:
+      loadbalancer:
+        servers:
+          - url: http://ddev-portfolio2-xhgui:80
+        
+    
+    
+
+tls:
+  certificates:
+    - certFile: /mnt/ddev-global-cache/traefik/certs/portfolio2.crt
+      keyFile: /mnt/ddev-global-cache/traefik/certs/portfolio2.key

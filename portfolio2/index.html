@@ -196,7 +196,8 @@
                 TEACHING & LEARNING LAB
             </a>
             <div class="hidden md:flex items-center space-x-8">
-                <a href="#work" class="text-lg hover:text-[var(--primary-color)] transition-colors">Work</a>
+                <a href="#work" class="text-lg hover:text-[var(--primary-color)] transition-colors">Our Work</a>
+                <a href="blog.html" class="text-lg hover:text-[var(--primary-color)] transition-colors">Blog</a>
                 <a href="#about" class="text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
                 <div id="theme-switcher" class="theme-switcher">
                     <div class="theme-switcher-dot"></div>
@@ -210,7 +211,8 @@
         </nav>
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
-            <a href="#work" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">Work</a>
+            <a href="#work" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">Our Work</a>
+            <a href="blog.html" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">Blog</a>
             <a href="#about" class="block py-2 text-lg hover:text-[var(--primary-color)] transition-colors">About</a>
             <div class="flex items-center mt-2 space-x-4">
                  <span>Theme:</span>
@@ -516,38 +518,9 @@
             // --- INITIAL RENDER ---
             createFilterButtons();
             renderProjects();
-
-            // --- Opacity Control ---
-            const opacitySlider = document.getElementById('opacity-slider');
-            const opacityValueDisplay = document.getElementById('opacity-value');
-            const root = document.documentElement;
-
-            const applyOpacity = (opacityPercent) => {
-                const opacity = opacityPercent / 100;
-                root.style.setProperty('--glass-opacity', opacity);
-                if (opacityValueDisplay) {
-                    opacityValueDisplay.textContent = `${opacityPercent}%`;
-                }
-                localStorage.setItem('glassOpacity', opacityPercent);
-            };
-
-            if (opacitySlider) {
-                opacitySlider.addEventListener('input', (e) => {
-                    applyOpacity(e.target.value);
-                });
-
-                const savedOpacity = localStorage.getItem('glassOpacity') || '91';
-                opacitySlider.value = savedOpacity;
-                applyOpacity(savedOpacity);
-            }
         });
     </script>
 
-    <!-- Opacity Control Panel -->
-    <div id="opacity-controls" class="fixed bottom-4 right-4 z-50 bg-[var(--card-bg)] p-4 rounded-lg shadow-lg border border-[var(--card-border)] w-48">
-        <label for="opacity-slider" class="block text-sm font-medium mb-2">Glass Opacity</label>
-        <input type="range" id="opacity-slider" min="0" max="100" value="91" class="w-full">
-        <span id="opacity-value" class="text-xs text-center block mt-1">80%</span>
-    </div>
+    <!-- Opacity Control Panel Removed -->
 </body>
 </html>
